@@ -1,7 +1,7 @@
 {
 	"variants": {
 		"": {
-			"model": "phstorage:block/huge_chest_wall"
+			"model": "phstorage:block/huge_chest_lining"
 		}
 	}
 }
