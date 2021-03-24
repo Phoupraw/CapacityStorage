@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "phstorage",
+  "version": "${version}",
+
+  "name": "容积储存",
+  "description": "一种与物品种类数量无关的储物箱。在这里，64个相同物品和64个不同但是最大堆叠数与之相同的物品所占的空间相同。",
+  "authors": [
+    "Ph-苯"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/phstorage/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "ph.phstorage.Initializer"
+    ],
+    "client": [
+      "ph.phstorage.ClientInitializer"
+    ]
+  },
+  "mixins": [
+    "phstorage.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.5",
+    "libblockattributes_items": ">=0.8.4"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

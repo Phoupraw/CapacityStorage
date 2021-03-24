@@ -1,0 +1,19 @@
+{
+  "type": "crafting_shaped",
+  "pattern": [
+    "AAA",
+    "ABA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "tag": "wooden_fences"
+    },
+    "B": {
+      "item": "phstorage:huge_chest_wall"
+    }
+  },
+  "result": {
+    "item": "phstorage:huge_chest_constructor"
+  }
+}

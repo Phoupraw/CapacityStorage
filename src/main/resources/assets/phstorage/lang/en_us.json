@@ -1,0 +1,14 @@
+{
+  "block.phstorage.huge_chest_wall": "巨型箱子外壁",
+  "block.phstorage.huge_chest_core": "巨型箱子核心",
+  "block.phstorage.huge_chest_constructor": "巨型箱子构构造机",
+  "gui.phstorage.east": "West",
+  "gui.phstorage.west": "East",
+  "gui.phstorage.up": "Up",
+  "gui.phstorage.down": "Down",
+  "gui.phstorage.south": "South",
+  "gui.phstorage.north": "North",
+  "gui.phstorage.construct": "Construct",
+  "gui.phstorage.capacity": "容积：%s",
+  "gui.phstorage.space": "空间：%s+%s/64"
+}
