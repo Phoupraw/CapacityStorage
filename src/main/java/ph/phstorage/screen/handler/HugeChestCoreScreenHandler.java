@@ -20,13 +20,13 @@ import ph.phstorage.block.BlocksRegistry;
 import ph.phstorage.block.entity.HugeChestCoreBlockEntity;
 
 public class HugeChestCoreScreenHandler extends ScreenHandler {
-	public static final Identifier CHANNEL =Initializer.wrap(Registry.BLOCK,BlocksRegistry.HUGE_CHEST_CORE);// Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CORE);
+	public static final Identifier CHANNEL = Initializer.wrap(Registry.BLOCK, BlocksRegistry.HUGE_CHEST_CORE);// Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CORE);
+	public static final int CURSOR_SLOT_ID = -70;
 	public final HugeChestCoreBlockEntity thisBlockEntity;
 	private final PlayerInventory playerInventory;
 	
 	public HugeChestCoreScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
 		this(syncId, playerInventory, (HugeChestCoreBlockEntity) playerInventory.player.getEntityWorld().getBlockEntity(buf.readBlockPos()));
-		
 	}
 	
 	public HugeChestCoreScreenHandler(int syncId, PlayerInventory playerInventory, HugeChestCoreBlockEntity thisBlockEntity) {
@@ -34,9 +34,6 @@ public class HugeChestCoreScreenHandler extends ScreenHandler {
 		this.playerInventory = playerInventory;
 		this.thisBlockEntity = thisBlockEntity;
 		CodeUtil.addPlayerSlots(this::addSlot, playerInventory);
-	}
-	
-	public void refreshSlots() {
 	}
 	
 	@Override
@@ -52,22 +49,6 @@ public class HugeChestCoreScreenHandler extends ScreenHandler {
 	
 	@Override
 	public ItemStack transferSlot(PlayerEntity player, int index) {
-		Slot slot = getSlot(index);
-		ItemStack stack = slot.getStack().copy();
-		if (!stack.isEmpty()) {
-			if (slot.inventory == playerInventory) {
-				stack = thisBlockEntity.insert(stack);
-				refreshSlots();
-			} else {
-				
-				//			insertItem(stack, 0, 36, false);
-			}
-			if (stack.isEmpty()) {
-				slot.takeStack(slot.getStack().getCount());
-			} else {
-				slot.takeStack(slot.getStack().getCount() - stack.getCount());
-			}
-		}
 		return ItemStack.EMPTY;
 	}
 	
@@ -86,89 +67,133 @@ public class HugeChestCoreScreenHandler extends ScreenHandler {
 		return super.onButtonClick(player, buttonId);
 	}
 	
-	public void syncPutStack(int code) {
-		putStack(code);
-		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-		buf.writeByte(0);
-		buf.writeInt(code);
-		ClientPlayNetworking.send(CHANNEL, buf);
-	}
-	public void putStack(SlotActionType from, int count, int slotId) {//TODO
-		ItemStack stack = ItemStack.EMPTY;
-		switch (from){
-			case PICKUP:
-				if (!playerInventory.getCursorStack().isEmpty())
-					stack=playerInventory.getCursorStack().split(count);
-				break;
-			case QUICK_MOVE:
-				Slot slot=getSlot(slotId);
-				stack=slot.getStack().split(count);
-				break;
-		}
-	}
-	public void putStack(int code) {
-//		System.out.println("putStack");
-		if (code == 0 || code == 1) {
-			ItemStack stack = playerInventory.getCursorStack();
-			if (!stack.isEmpty()) {
-				int count = 0;
-				if (code == 1) {
-					count = stack.getCount() - 1;
-					stack.setCount(1);
-				}
-				stack = thisBlockEntity.insert(stack);
-				stack.increment(count);
-				playerInventory.setCursorStack(stack);
-			}
-		} else if (code == 2) {
-			if (playerInventory.player.isCreative()) {
-				thisBlockEntity.insert(playerInventory.getCursorStack());
-			}
+	public void syncPutStack(int slotId, int count) {
+		if (putStack(slotId, count)) {
+			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+			buf.writeByte(0);
+			buf.writeInt(slotId);
+			buf.writeInt(count);
+			ClientPlayNetworking.send(CHANNEL, buf);
 		}
 	}
 	
 	public void syncTakeStack(ItemStack stack, int count, SlotActionType to) {
-		takeStack(stack,count,to);
-		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-		buf.writeByte(1);
-		buf.writeItemStack(stack);
-		buf.writeInt(count);
-		buf.writeEnumConstant(to);
-		ClientPlayNetworking.send(CHANNEL, buf);
+		ItemStack stack1 = stack.copy();
+		if (takeStack(stack, count, to)) {
+			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+			buf.writeByte(1);
+			buf.writeItemStack(stack1);
+			buf.writeInt(count);
+			buf.writeEnumConstant(to);
+			ClientPlayNetworking.send(CHANNEL, buf);
+		}
 	}
 	
-	public void takeStack(ItemStack stack, int count, SlotActionType to) {
-		if (count < 0 && playerInventory.player.isCreative()) {
-			stack.setCount(stack.getMaxCount());
-		} else if (count > 0) {
-			stack = thisBlockEntity.extract(stack, count);
+	/**
+	 * @param stack 要复制的物品
+	 * @param to 去向：0->鼠标；1->物品栏；2->箱子；3->扔出
+	 */
+	public void syncCloneStack(ItemStack stack, int to) {
+		if (cloneStack(stack, to)) {
+			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+			buf.writeByte(2);
+			buf.writeItemStack(stack);
+			buf.writeByte(to);
+			ClientPlayNetworking.send(CHANNEL, buf);
 		}
+	}
+	
+	private boolean putStack(int slotId, int count) {
+		ItemStack stack;
+		if (slotId == CURSOR_SLOT_ID) {
+			stack = playerInventory.getCursorStack();
+		} else {
+			stack = getSlot(slotId).getStack();
+		}
+		if (stack.isEmpty())
+			return false;
+		ItemStack stack2 = stack.split(count);
+		ItemStack stack1 = thisBlockEntity.insert(stack2);
+		if (ItemStack.areEqual(stack1, stack2)) {
+			return false;
+		}
+		if (!stack1.isEmpty()) {
+			if (stack.isEmpty()) {
+				stack = stack1;
+			} else {
+				stack.increment(stack1.getCount());
+			}
+		}
+		if (slotId == CURSOR_SLOT_ID) {
+			playerInventory.setCursorStack(stack);
+		} else {
+			getSlot(slotId).setStack(stack);
+		}
+		return true;
+	}
+	
+	private boolean takeStack(ItemStack stack, int count, SlotActionType to) {
+		stack = thisBlockEntity.extract(stack, count);
+		if (stack.isEmpty())
+			return false;
 		switch (to) {
 			case PICKUP:
 				if (!playerInventory.getCursorStack().isEmpty())
 					playerInventory.setCursorStack(thisBlockEntity.insert(playerInventory.getCursorStack()));
+				if (playerInventory.getCursorStack().isEmpty()) {
+					playerInventory.setCursorStack(stack);
+					return true;
+				} else {
+					thisBlockEntity.insert(stack);
+					return false;
+				}
+			case QUICK_MOVE:
+				boolean b = insertItem(stack, 0, 36, false);
+				if (!stack.isEmpty())
+					thisBlockEntity.insert(stack);
+				return b;
+			case THROW:
+				playerInventory.player.dropItem(stack, true);
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean cloneStack(ItemStack stack, int to) {
+		if (stack.isEmpty() || !playerInventory.player.isCreative())
+			return false;
+		switch (to) {
+			case 0:
 				if (playerInventory.getCursorStack().isEmpty())
 					playerInventory.setCursorStack(stack);
 				else
-					thisBlockEntity.insert(stack);
+					return false;
 				break;
-			case QUICK_MOVE:
-				insertItem(stack , 0, 36, false);
-				if (!stack.isEmpty())
-					thisBlockEntity.insert(stack);
+			case 1:
+				if (!insertItem(stack, 0, 36, false))
+					return false;
 				break;
-			case THROW:
-				playerInventory.player.dropItem(stack, true);
+			case 2:
+				if (stack.equals(thisBlockEntity.insert(stack)))
+					return false;
+				break;
+			case 3:
+				playerInventory.player.dropItem(stack, false, true);
 				break;
 		}
+		return true;
 	}
 	
-	public void receive(PacketByteBuf buf) {
-		byte code = buf.readByte();
-		if ((code & 1) == 0) {
-			putStack(buf.readInt());
-		} else {
-			takeStack(buf.readItemStack(),buf.readInt(),buf.readEnumConstant(SlotActionType.class));
+	private void receive(PacketByteBuf buf) {
+		switch (buf.readByte()) {
+			case 0:
+				putStack(buf.readInt(), buf.readInt());
+				break;
+			case 1:
+				takeStack(buf.readItemStack(), buf.readInt(), buf.readEnumConstant(SlotActionType.class));
+				break;
+			case 2:
+				cloneStack(buf.readItemStack(), buf.readByte());
 		}
 	}
 	

@@ -14,11 +14,6 @@
           ],
           "name": "phstorage:huge_chest_constructor"
         }
-      ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
       ]
     }
   ]

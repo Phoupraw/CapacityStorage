@@ -23,17 +23,15 @@ import ph.phstorage.screen.handler.HugeChestConstructorScreenHandler;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static ph.phstorage.screen.HugeChestConstructorScreen.Finals.*;
 
 @Environment(EnvType.CLIENT)
 public class HugeChestConstructorScreen extends HandledScreen<HugeChestConstructorScreenHandler> {
 	public static final Identifier BACKGROUND = ClientInitializer.toGuiTexture(Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CONSTRUCTOR));
 	public static final Map<Direction, TranslatableText> DIRECTION_TEXTS = ImmutableMap.copyOf(Arrays.stream(Direction.values()).collect(Collectors.toMap(Function.identity(), direction -> new TranslatableText("gui." + Initializer.NAMESPACE + "." + direction.getName()))));
 	private Map<Direction, TextFieldWidget> textFields;
-//	private ButtonWidget constructButton;
 	@Nullable
 	private TextFieldWidget uneditableTextField;
 	
@@ -47,7 +45,7 @@ public class HugeChestConstructorScreen extends HandledScreen<HugeChestConstruct
 		ImmutableMap.Builder<Direction, TextFieldWidget> builder = ImmutableMap.builder();
 		int i = 0;
 		for (Direction direction : new Direction[]{Direction.EAST, Direction.UP, Direction.SOUTH, Direction.WEST, Direction.DOWN, Direction.NORTH}) {
-			TextFieldWidget textFieldWidget = new TextFieldWidget(textRenderer, x + TFX + TFXD * (i % 3), y + TFY + TFYD * (i / 3), TFW, TFH, LiteralText.EMPTY) {
+			TextFieldWidget textFieldWidget = new TextFieldWidget(textRenderer, x + 9 + 54 * (i % 3), y + 34 + 26 * (i / 3), 50, 9, LiteralText.EMPTY) {
 				
 				@Override
 				protected void onFocusedChanged(boolean bl) {
@@ -66,26 +64,32 @@ public class HugeChestConstructorScreen extends HandledScreen<HugeChestConstruct
 				}
 				
 				@Override
-				public boolean mouseClicked(double mouseX, double mouseY, int button) {
-					if (uneditableTextField == this) {
-						if (isFocused())
+				public boolean mouseClicked(double mouseX, double mouseY, int mouse) {
+					if (hovered) {
+						super.mouseClicked(mouseX, mouseY, mouse);
+						if (uneditableTextField == this) {//如果自己是不可编辑的，则失去焦点
+							setText("0");
 							setSelected(false);
-						return false;
-					} else if (super.mouseClicked(mouseX, mouseY, button)) {
-						//为了让其它TextFieldWidget失去焦点
-						for (TextFieldWidget textFieldWidget1 : textFields.values()) {
-							if (textFieldWidget1 != this) {
-								textFieldWidget1.mouseClicked(mouseX, mouseY, button);
+						} else {
+							if (mouse == 1) {//右键清除文本
+								setText("");
+							}
+							setSelected(true);
+							for (TextFieldWidget textFieldWidget1 : textFields.values()) {//为了让其它TextFieldWidget失去焦点
+								if (textFieldWidget1 != this) {
+									textFieldWidget1.setSelected(false);
+								}
 							}
 						}
 						return true;
+					}else{
+						setSelected(false);
 					}
 					return false;
 				}
 			};
 			textFieldWidget.setTextPredicate(string -> string.isEmpty() || StringUtils.isNumeric(string));
 			textFieldWidget.setHasBorder(false);
-			textFieldWidget.setMaxLength(5);
 			textFieldWidget.setText(String.valueOf(handler.getExtension(direction)));
 			textFieldWidget.setChangedListener(string -> {
 				int c = 0;
@@ -103,7 +107,7 @@ public class HugeChestConstructorScreen extends HandledScreen<HugeChestConstruct
 						(uneditableTextField = emptyTextField).setEditable(false);
 					} else {
 						(uneditableTextField = textFieldWidget).setEditable(false);
-						textFieldWidget.setText(string= "0");
+						textFieldWidget.setText(string = "0");
 						textFieldWidget.setSelected(false);
 					}
 				} else {
@@ -116,10 +120,9 @@ public class HugeChestConstructorScreen extends HandledScreen<HugeChestConstruct
 			i++;
 		}
 		textFields = builder.build();
-//		addButton(constructButton = new ButtonWidget(x + 118, y + 51, 51, 20, new TranslatableText("gui." + Initializer.NAMESPACE + ".construct"), button -> {
-			//			handler.onButtonClick(playerInventory.player,0);
-//			client.interactionManager.clickButton(handler.syncId, HugeChestConstructorScreenHandler.CONSTRUCT_BUTTON_ID);
-//		}));
+		for (TextFieldWidget textField:textFields.values()){
+			textField.setText(textField.getText());
+		}
 	}
 	
 	@Override//必须重写，不然没有暗色背景和工具提示
@@ -131,35 +134,24 @@ public class HugeChestConstructorScreen extends HandledScreen<HugeChestConstruct
 	
 	@Override
 	protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		client.getTextureManager().bindTexture(BACKGROUND);
+		RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
+		Objects.requireNonNull(client, "client").getTextureManager().bindTexture(BACKGROUND);
 		drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
-		if (uneditableTextField != null) {
-			drawTexture(matrices, uneditableTextField.x - 2, uneditableTextField.y - 2, 176, 0, uneditableTextField.getWidth() + 4, uneditableTextField.getHeight() + 4);
+		for (Map.Entry<Direction, TextFieldWidget> entry : textFields.entrySet()) {
+			drawTexture(matrices, entry.getValue().x - 2, entry.getValue().y - 2, 176, 0, entry.getValue().getWidth() + 4, entry.getValue().getHeight() + 4);
+			if (entry.getValue() == uneditableTextField) {
+				drawTexture(matrices, Objects.requireNonNull(uneditableTextField, "uneditableTextField").x - 2, uneditableTextField.y - 2, 176, uneditableTextField.getHeight()+4, uneditableTextField.getWidth() + 4, uneditableTextField.getHeight() + 4);
+			} else {
+				drawTexture(matrices, entry.getValue().x - 2, entry.getValue().y - 2, 176, 0, entry.getValue().getWidth() + 4, entry.getValue().getHeight() + 4);
+			}
 		}
 		for (Map.Entry<Direction, TextFieldWidget> entry : textFields.entrySet()) {
-			textRenderer.draw(matrices, DIRECTION_TEXTS.get(entry.getKey()), entry.getValue().x, entry.getValue().y - textRenderer.fontHeight - (TFX - TFTX), 0);
+			textRenderer.draw(matrices, DIRECTION_TEXTS.get(entry.getKey()), entry.getValue().x, entry.getValue().y - textRenderer.fontHeight - 2, 0);
 		}
 	}
 	
 	@Override
 	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
 		super.drawForeground(matrices, mouseX, mouseY);
-	}
-	
-	static {
-	}
-	
-	public static class Finals {
-		public static final int TFX = 9;
-		public static final int TFY = 34;
-		public static final int TFW = 33;
-		public static final int TFH = 9;
-		public static final int TFTX = 7;
-		public static final int TFTY = 32;
-		public static final int TFTW = 37;
-		public static final int TFTH = 13;
-		public static final int TFXD = TFTW;
-		public static final int TFYD = TFTH + 13;
 	}
 }

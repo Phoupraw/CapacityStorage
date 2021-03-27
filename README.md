@@ -1,4 +1,4 @@
 # 容积储物
 ## 前置模组：
-* Lib Block Attributes的Items模块，版本至少为0.8.4
-* Fabric API
+* Lib Block Attributes V0.8.4
+* Fabric API V0.30.0+1.16

@@ -49,7 +49,6 @@ public class HugeChestWallBlock extends BlockWithEntity implements AttributeProv
 			builder.add(property);
 		}
 	}
-	
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		if (!state.isOf(newState.getBlock())) {

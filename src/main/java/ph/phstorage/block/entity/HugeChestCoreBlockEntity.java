@@ -180,6 +180,9 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 		if (stack == null)
 			return ItemStack.EMPTY;
 		ItemStack stack1 = stack.split(maxAmount);
+		if (stack.isEmpty()){
+			tabledItems.remove(stack1.getItem(),nullable(stack1.getTag()));
+		}
 		addSpace(stack1);
 		return stack1;
 	}
@@ -226,11 +229,11 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 		}
 	}
 	
-	protected void setStackCapacity(double stackCapacity) {
+	 void setStackCapacity(double stackCapacity) {
 		this.stackCapacity = stackCapacity;
 	}
 	
-	protected void setStackSpace(double stackSpace) {
+	 void setStackSpace(double stackSpace) {
 		this.stackSpace = stackSpace;
 	}
 	
@@ -314,11 +317,11 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 		CodeUtil.drop(world,  new Vec3d(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5), clearToList());
 	}
 	
-	protected void addSpace(ItemStack stack) {
+	 void addSpace(ItemStack stack) {
 		addSpace(stack, stack.getCount());
 	}
 	
-	protected void addSpace(ItemStack stack, int count) {
+	 void addSpace(ItemStack stack, int count) {
 		stackSpace += 1d * count / stack.getMaxCount();
 	}
 	

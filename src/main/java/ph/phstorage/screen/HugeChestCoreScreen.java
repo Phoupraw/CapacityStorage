@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -23,19 +24,20 @@ import ph.phstorage.block.entity.HugeChestCoreBlockEntity;
 import ph.phstorage.screen.handler.HugeChestCoreScreenHandler;
 
 import java.util.List;
+import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
 public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandler> {
 	public static final Identifier BACKGROUND = ClientInitializer.toGuiTexture(Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CORE));
-	private static int itemsX;
-	private static int itemsY;
-	private static int itemsWidth;
-	private static int itemsHeight;
-	private static int borderBreadth;
-	private static int fontHeight;
-	private static int viewingRow;
-	private static int totalRows;
-	private static int rowCapacity;
+	private int itemsX;
+	private int itemsY;
+	private int itemsWidth;
+	private int itemsHeight;
+	private int borderBreadth;
+	private int fontHeight;
+	private int viewingRow;
+	private int totalRows;
+	private int rowCapacity;
 	private List<List<Pair<Integer, ItemStack>>> itemXes;
 	
 	public HugeChestCoreScreen(HugeChestCoreScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -45,22 +47,16 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 	@Override
 	protected void init() {
 		super.init();
-		//		if (itemsX == 0)
 		fontHeight = textRenderer.fontHeight;
 		itemsX = x / 2 + borderBreadth + fontHeight;
-		//		if (itemsY == 0)
 		itemsY = y / 2 + borderBreadth;
-		//		if (itemsWidth == 0)
 		itemsWidth = (width - itemsX * 2) / 16 * 16;
-		//		if (itemsHeight == 0)
 		itemsHeight = (y + handler.getSlot(0).y - 16 - itemsY) / 16 * 16;
-		//		if (borderWidth == 0)
 		rowCapacity = itemsHeight / 16;
-		viewingRow=0;
+		viewingRow = 0;
 		borderBreadth = 8;
 		titleX = itemsX - x;
 		titleY = itemsY - textRenderer.fontHeight - 1 - y;
-		//		playerInventoryTitleX=titleX;
 		playerInventoryTitleY = handler.getSlot(0).y - textRenderer.fontHeight - 1;
 	}
 	
@@ -74,7 +70,7 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 	@Override
 	protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
 		RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-		client.getTextureManager().bindTexture(BACKGROUND);
+		Objects.requireNonNull(client, "client").getTextureManager().bindTexture(BACKGROUND);
 		drawTexture(matrices, x, y + 60, 0, 60, backgroundWidth, 106);
 		drawTexture(matrices, itemsX - borderBreadth, itemsY - borderBreadth - fontHeight, 0, 0, borderBreadth, borderBreadth + fontHeight);
 		drawTexture(matrices, itemsX + itemsWidth, itemsY - borderBreadth - fontHeight, borderBreadth + 16, 0, borderBreadth, borderBreadth + fontHeight);
@@ -142,30 +138,7 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 				itemXes.get(itemXes.size() - 1).add(new Pair<>(w + x1, stack));
 			}
 			x1 += w;
-			//			if ((x1 += w) > itemsX + itemsWidth - 16) {
-			//				x1 = itemsX;
-			//				if (irow >= viewingRow) {
-			//					y1 += 16;
-			//					totalRows++;
-			//					if (y1 > itemsY + itemsHeight - 16) {
-			//						totalRows++;
-			//						break;
-			//					}
-			//					itemXes.add(Lists.newArrayList());
-			//				}
-			//				irow++;
-			//			}
 		}
-	}
-	
-	@Override
-	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-		super.drawForeground(matrices, mouseX, mouseY);
-	}
-	
-	@Override
-	protected void onMouseClick(Slot slot, int invSlot, int clickData, SlotActionType actionType) {
-		super.onMouseClick(slot, invSlot, clickData, actionType);
 	}
 	
 	@Override
@@ -182,51 +155,52 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 	 */
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int key) {
-		if (mouseX >= itemsX - borderBreadth && mouseX < itemsX && mouseY >= itemsY && mouseY < itemsY + itemsHeight) {
-			itemsX += 16 * (key == 0 ? -1 : 1);
-			titleX = itemsX - x;
-			itemsWidth -= 16 * (key == 0 ? -1 : 1);
-			return true;
-		}
-		if (mouseX >= itemsX + itemsWidth && mouseX < itemsX + itemsWidth + borderBreadth && mouseY >= itemsY && mouseY < itemsY + itemsHeight) {
-			itemsWidth -= 16 * (key == 0 ? -1 : 1);
-			return true;
-		}
-		if (mouseX >= itemsX && mouseX < itemsX + itemsWidth && mouseY >= itemsY - borderBreadth - fontHeight && mouseY < itemsY) {
-			itemsY += 16 * (key == 0 ? -1 : 1);
-			titleY = itemsY - textRenderer.fontHeight - y;
-			itemsHeight -= 16 * (key == 0 ? -1 : 1);
-			return true;
-		}
-		if (mouseX >= itemsX && mouseX < itemsX + itemsWidth && mouseY >= itemsY && mouseY < itemsY + itemsHeight) {
-			if (playerInventory.getCursorStack().isEmpty()) {
-				ItemStack stack = getHoveredStack(mouseX, mouseY).copy();
+//		System.out.println("key="+key);
+		if (Screen.hasShiftDown()) {
+			if (focusedSlot != null) {
+				ItemStack stack = focusedSlot.getStack();
 				if (!stack.isEmpty()) {
-					if (stack.getCount() > stack.getMaxCount())
-						stack.setCount(stack.getMaxCount());
-					int count = 0;
-					switch (key) {
-						case 0:
-							count = stack.getCount();
-							break;
-						case 1:
-							count = (stack.getCount() + 1) / 2;
-							break;
-						case 2:
-							count = -1;
-							break;
+					if (key == 2) {
+						handler.syncCloneStack(stack, 2);
+					} else {
+						handler.syncPutStack(focusedSlot.id, key == 0 ? stack.getCount() : (stack.getCount() + 1) / 2);
 					}
-					SlotActionType go = null;
-					if (Screen.hasShiftDown()) {
-						go = SlotActionType.QUICK_MOVE;
-					} else
-						go = SlotActionType.PICKUP;
-					handler.syncTakeStack(stack, count, go);
 					return true;
 				}
 			} else {
-				handler.syncPutStack(key);
+				ItemStack stack = getHoveredStack(mouseX, mouseY);
+				if (!stack.isEmpty()) {
+					if (stack.getCount() > stack.getMaxCount())
+						stack.setCount(stack.getMaxCount());
+					if (key == 2) {
+						handler.syncCloneStack(stack, 1);
+					} else {
+						handler.syncTakeStack(stack, key == 0 ? stack.getCount() : (stack.getCount() + 1) / 2, SlotActionType.QUICK_MOVE);
+					}
+					return true;
+				}
+			}
+		} else if (mouseX >= itemsX && mouseX < itemsX + itemsWidth && mouseY >= itemsY && mouseY < itemsY + itemsHeight) {
+			ItemStack stack = playerInventory.getCursorStack();
+			if (!stack.isEmpty()) {
+				if (key == 2) {
+					handler.syncCloneStack(stack, 2);
+				} else {
+					handler.syncPutStack(HugeChestCoreScreenHandler.CURSOR_SLOT_ID, key == 0 ? stack.getCount() : 1);
+				}
 				return true;
+			} else {
+				stack = getHoveredStack(mouseX, mouseY);
+				if (!stack.isEmpty()) {
+					if (stack.getCount() > stack.getMaxCount())
+						stack.setCount(stack.getMaxCount());
+					if (key == 2) {
+						handler.syncCloneStack(stack, 0);
+					} else {
+						handler.syncTakeStack(stack, key == 0 ? stack.getCount() : (stack.getCount() + 1) / 2, SlotActionType.PICKUP);
+					}
+					return true;
+				}
 			}
 		}
 		return super.mouseClicked(mouseX, mouseY, key);
@@ -234,11 +208,11 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 	
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+		final int std = 0;
 		if (isClickOutsideBounds(mouseX, mouseY, x, y, 0)) {
-//			System.out.printf("totalRows=%d,rowCapacity=%d,viewingRow=%d%n", totalRows, rowCapacity, viewingRow);
-			if (amount < 0 && totalRows > rowCapacity) {
+			if (amount < std && totalRows > rowCapacity) {
 				viewingRow -= amount;
-			} else if (amount > 0) {
+			} else if (amount > std) {
 				viewingRow -= amount;
 				if (viewingRow < 0)
 					viewingRow = 0;
@@ -247,8 +221,45 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 			if (focusedSlot != null) {
 				ItemStack stack = focusedSlot.getStack();
 				if (!stack.isEmpty()) {
-					if (amount < 0) {
-					
+					if (amount > std) {
+						if (Screen.hasShiftDown()) {
+							for (int i = 0; i < 27 && amount > std; i++) {
+								if (i != focusedSlot.id && ScreenHandler.canStacksCombine(stack, handler.getSlot(i).getStack())) {
+									amount--;
+									handler.syncPutStack(i, handler.getSlot(i).getStack().getCount());
+								}
+							}
+							if (amount > std) {
+								handler.syncPutStack(focusedSlot.id, focusedSlot.getStack().getCount());
+							}
+						} else {
+							while (!focusedSlot.getStack().isEmpty() && amount > std) {
+								amount--;
+								handler.syncPutStack(focusedSlot.id, 1);
+							}
+						}
+					} else {
+						while (amount < std) {
+							amount++;
+							handler.syncTakeStack(stack, Screen.hasShiftDown() ? stack.getMaxCount() : 1, SlotActionType.QUICK_MOVE);
+						}
+					}
+				}
+			} else {
+				ItemStack stack = getHoveredStack(mouseX, mouseY);
+				if (!stack.isEmpty()) {
+					if (amount > std) {
+						for (int i = 0; i < 27 && amount > std; i++) {
+							if (ScreenHandler.canStacksCombine(stack, handler.getSlot(i).getStack())) {
+								amount--;
+								handler.syncPutStack(i, Screen.hasShiftDown() ? handler.getSlot(i).getStack().getCount() : 1);
+							}
+						}
+					} else {
+						while (amount < std) {
+							amount++;
+							handler.syncTakeStack(stack, Screen.hasShiftDown() ? stack.getMaxCount() : 1, SlotActionType.QUICK_MOVE);
+						}
 					}
 				}
 			}
@@ -268,10 +279,12 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 	
 	@Override
 	public boolean mouseReleased(double mouseX, double mouseY, int button) {
-		return !(mouseX >= itemsX - borderBreadth && mouseX < itemsX + itemsWidth + borderBreadth && mouseY >= itemsY - borderBreadth - fontHeight && mouseY < itemsY + itemsHeight + borderBreadth) && super.mouseReleased(mouseX, mouseY, button);
+		if (mouseX >= itemsX - borderBreadth && mouseX < itemsX + itemsWidth + borderBreadth && mouseY >= itemsY - borderBreadth - fontHeight && mouseY < itemsY + itemsHeight + borderBreadth)
+			return true;
+		return super.mouseReleased(mouseX, mouseY, button);
 	}
 	
-	public ItemStack getHoveredStack(double mouseX, double mouseY) {
+	private ItemStack getHoveredStack(double mouseX, double mouseY) {
 		if (mouseY >= itemsY && mouseY < itemsY + 16 * (1 + itemXes.size()) && mouseX >= itemsX && mouseX < itemsX + itemsWidth) {
 			int row = (int) ((mouseY - itemsY) / 16);
 			if (row >= 0 && row < itemXes.size()) {
