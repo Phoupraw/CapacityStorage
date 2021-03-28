@@ -29,13 +29,13 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 import ph.phstorage.api.CodeUtil;
 import ph.phstorage.block.BlocksRegistry;
-import ph.phstorage.screen.handler.HugeChestCoreScreenHandler;
+import ph.phstorage.screen.handler.ChestCoreScreenHandler;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItemInv, ExtendedScreenHandlerFactory, BlockEntityClientSerializable {
+public class ChestCoreBlockEntity extends BlockEntity implements GroupedItemInv, ExtendedScreenHandlerFactory, BlockEntityClientSerializable {
 	public static final double SINGLE_CAPACITY = 27;
 	public static final Comparator<ItemStack> DEFAULT_COMPARATOR = (a, b) -> {
 		if (a.getItem() != b.getItem())
@@ -62,11 +62,9 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 	private Map<Direction, Integer> extensions = Maps.newEnumMap(Arrays.stream(Direction.values()).collect(Collectors.toMap(Function.identity(), d -> 0)));
 	private double stackCapacity = SINGLE_CAPACITY;
 	private double stackSpace = getStackCapacity();
-	@Deprecated
-	private Map<Pair<Item, CompoundTag>, Integer> mappedItems = Maps.newHashMap();
 	private Table<Item, CompoundTag, ItemStack> tabledItems = HashBasedTable.create();
 	
-	public HugeChestCoreBlockEntity() {
+	public ChestCoreBlockEntity() {
 		super(BlockEntityTypesRegistry.HUGE_CHEST_CORE);
 	}
 	
@@ -100,7 +98,7 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 		for (Iterator<Table.Cell<Item, CompoundTag, ItemStack>> iterator = tabledItems.cellSet().iterator(); iterator.hasNext(); ) {
 			Table.Cell<Item, CompoundTag, ItemStack> cell = iterator.next();
 			if (filter.matches(cell.getValue())) {
-				if (count >= cell.getValue().getCount()) {
+				if (count >= Objects.requireNonNull(cell.getValue(), "cell.getValue()").getCount()) {
 					if (simulation.isAction()) {
 						iterator.remove();
 						addSpace(cell.getValue());
@@ -123,16 +121,18 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 	@Override
 	public ItemStack attemptInsertion(ItemStack stack, Simulation simulation) {
 		if (!stack.isEmpty()) {
-			if (world != null && !world.isClient)
-				sync();
 			stack = stack.copy();
 			int countLimited = Math.min(stack.getCount(), (int) (getStackSpace() * stack.getMaxCount()));
-			ItemStack stack1 = stack.split(countLimited);
-			if (simulation.isAction()) {
-				if (tabledItems.contains(stack1.getItem(), nullable(stack1.getTag())))
-					stack1.increment(tabledItems.get(stack1.getItem(), nullable(stack1.getTag())).getCount());
-				tabledItems.put(stack1.getItem(), nullable(stack1.getTag()), stack1);
-				addSpace(stack, -countLimited);
+			if (countLimited > 0) {
+				if (world != null && !world.isClient)
+					sync();
+				ItemStack stack1 = stack.split(countLimited);
+				if (simulation.isAction()) {
+					if (tabledItems.contains(stack1.getItem(), nullable(stack1.getTag())))
+						stack1.increment(tabledItems.get(stack1.getItem(), nullable(stack1.getTag())).getCount());
+					tabledItems.put(stack1.getItem(), nullable(stack1.getTag()), stack1);
+					addSpace(stack1, -countLimited);
+				}
 			}
 		}
 		return stack;
@@ -180,8 +180,8 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 		if (stack == null)
 			return ItemStack.EMPTY;
 		ItemStack stack1 = stack.split(maxAmount);
-		if (stack.isEmpty()){
-			tabledItems.remove(stack1.getItem(),nullable(stack1.getTag()));
+		if (stack.isEmpty()) {
+			tabledItems.remove(stack1.getItem(), nullable(stack1.getTag()));
 		}
 		addSpace(stack1);
 		return stack1;
@@ -199,18 +199,19 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 	
 	@Override
 	public Text getDisplayName() {
-		return new TranslatableText(BlocksRegistry.HUGE_CHEST_CORE.getTranslationKey());
+		return new TranslatableText(BlocksRegistry.CHEST_CORE.getTranslationKey());
 	}
 	
 	@Nullable
 	@Override
 	public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-		return new HugeChestCoreScreenHandler(syncId, inv, this);
+		return new ChestCoreScreenHandler(syncId, inv, this);
 	}
 	
 	protected void setExtensions(Map<Direction, Integer> extensions) {
 		this.extensions = extensions;
 	}
+	
 	@Deprecated
 	public void breakEntireChest() {
 		int e = extensions.get(Direction.EAST), w = -extensions.get(Direction.WEST), u = extensions.get(Direction.UP), d = -extensions.get(Direction.DOWN), s = extensions.get(Direction.SOUTH), n = -extensions.get(Direction.NORTH);
@@ -220,8 +221,8 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 					if (i > w && i < e && j > d && j < u && k > n && k < s || i == 0 && j == 0 && k == 0)
 						continue;
 					BlockPos pos = getPos().add(i, j, k);
-					BlockState state = world.getBlockState(pos);
-					if (state.isOf(BlocksRegistry.HUGE_CHEST_WALL)) {
+					BlockState state = Objects.requireNonNull(world, "world").getBlockState(pos);
+					if (state.isOf(BlocksRegistry.CHEST_WALL)) {
 						world.breakBlock(pos, true);
 					}
 				}
@@ -229,11 +230,11 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 		}
 	}
 	
-	 void setStackCapacity(double stackCapacity) {
+	void setStackCapacity(double stackCapacity) {
 		this.stackCapacity = stackCapacity;
 	}
 	
-	 void setStackSpace(double stackSpace) {
+	void setStackSpace(double stackSpace) {
 		this.stackSpace = stackSpace;
 	}
 	
@@ -247,7 +248,6 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 	
 	public List<ItemStack> clearToList() {
 		List<ItemStack> list = Lists.newArrayList(tabledItems.values());
-		System.out.println(list);
 		clear();
 		return list;
 	}
@@ -262,25 +262,26 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 						continue;
 					if ((i == w || i == e) || (j == d || j == u) || (k == n || k == s)) {
 						BlockPos pos1 = getPos().add(i, j, k);
-						if (world.getBlockState(pos1).isOf(BlocksRegistry.HUGE_CHEST_WALL)){
-						BlockEntity blockEntity0 = world.getBlockEntity(pos1);
-						if (blockEntity0 instanceof HugeChestWallBlockEntity){
-							HugeChestWallBlockEntity wallBlockEntity = (HugeChestWallBlockEntity) blockEntity0;
-							if (getPos().equals(wallBlockEntity.getCorePos())){
-								world.setBlockState(pos1, BlocksRegistry.HUGE_CHEST_WALL.getDefaultState());
+						if (Objects.requireNonNull(world, "world").getBlockState(pos1).isOf(BlocksRegistry.CHEST_WALL)) {
+							BlockEntity blockEntity0 = world.getBlockEntity(pos1);
+							if (blockEntity0 instanceof ChestWallBlockEntity) {
+								ChestWallBlockEntity wallBlockEntity = (ChestWallBlockEntity) blockEntity0;
+								if (getPos().equals(wallBlockEntity.getCorePos())) {
+									world.setBlockState(pos1, BlocksRegistry.CHEST_WALL.getDefaultState());
+								}
 							}
 						}
-					}}
+					}
 				}
 			}
 		}
 		//把自身变成构造机
 		CompoundTag coreBlockEntityTag = toTag(new CompoundTag());
 		clear();
-		world.setBlockState(getPos(), BlocksRegistry.HUGE_CHEST_CONSTRUCTOR.getDefaultState());
+		Objects.requireNonNull(world, "world").setBlockState(getPos(), BlocksRegistry.CHEST_CONSTRUCTOR.getDefaultState());
 		BlockEntity blockEntity0 = world.getBlockEntity(getPos());
-		if (blockEntity0 instanceof HugeChestConstructorBlockEntity) {
-			HugeChestConstructorBlockEntity constructor = (HugeChestConstructorBlockEntity) blockEntity0;
+		if (blockEntity0 instanceof ChestConstructorBlockEntity) {
+			ChestConstructorBlockEntity constructor = (ChestConstructorBlockEntity) blockEntity0;
 			constructor.setExtensions(extensions);
 			constructor.setCoreBlockEntityTag(coreBlockEntityTag);
 		}
@@ -314,14 +315,14 @@ public class HugeChestCoreBlockEntity extends BlockEntity implements GroupedItem
 	}
 	
 	public void onDestroyed() {
-		CodeUtil.drop(world,  new Vec3d(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5), clearToList());
+		CodeUtil.drop(world, new Vec3d(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5), clearToList());
 	}
 	
-	 void addSpace(ItemStack stack) {
+	void addSpace(ItemStack stack) {
 		addSpace(stack, stack.getCount());
 	}
 	
-	 void addSpace(ItemStack stack, int count) {
+	void addSpace(ItemStack stack, int count) {
 		stackSpace += 1d * count / stack.getMaxCount();
 	}
 	

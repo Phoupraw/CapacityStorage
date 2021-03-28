@@ -17,19 +17,19 @@ import net.minecraft.util.registry.Registry;
 import ph.phstorage.Initializer;
 import ph.phstorage.api.CodeUtil;
 import ph.phstorage.block.BlocksRegistry;
-import ph.phstorage.block.entity.HugeChestCoreBlockEntity;
+import ph.phstorage.block.entity.ChestCoreBlockEntity;
 
-public class HugeChestCoreScreenHandler extends ScreenHandler {
-	public static final Identifier CHANNEL = Initializer.wrap(Registry.BLOCK, BlocksRegistry.HUGE_CHEST_CORE);// Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CORE);
+public class ChestCoreScreenHandler extends ScreenHandler {
+	public static final Identifier CHANNEL = Initializer.wrap(Registry.BLOCK, BlocksRegistry.CHEST_CORE);// Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CORE);
 	public static final int CURSOR_SLOT_ID = -70;
-	public final HugeChestCoreBlockEntity thisBlockEntity;
+	public final ChestCoreBlockEntity thisBlockEntity;
 	private final PlayerInventory playerInventory;
 	
-	public HugeChestCoreScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-		this(syncId, playerInventory, (HugeChestCoreBlockEntity) playerInventory.player.getEntityWorld().getBlockEntity(buf.readBlockPos()));
+	public ChestCoreScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+		this(syncId, playerInventory, (ChestCoreBlockEntity) playerInventory.player.getEntityWorld().getBlockEntity(buf.readBlockPos()));
 	}
 	
-	public HugeChestCoreScreenHandler(int syncId, PlayerInventory playerInventory, HugeChestCoreBlockEntity thisBlockEntity) {
+	public ChestCoreScreenHandler(int syncId, PlayerInventory playerInventory, ChestCoreBlockEntity thisBlockEntity) {
 		super(ScreenHandlerTypesRegistry.HUGE_CHEST_CORE, syncId);
 		this.playerInventory = playerInventory;
 		this.thisBlockEntity = thisBlockEntity;
@@ -114,9 +114,6 @@ public class HugeChestCoreScreenHandler extends ScreenHandler {
 			return false;
 		ItemStack stack2 = stack.split(count);
 		ItemStack stack1 = thisBlockEntity.insert(stack2);
-		if (ItemStack.areEqual(stack1, stack2)) {
-			return false;
-		}
 		if (!stack1.isEmpty()) {
 			if (stack.isEmpty()) {
 				stack = stack1;
@@ -129,7 +126,7 @@ public class HugeChestCoreScreenHandler extends ScreenHandler {
 		} else {
 			getSlot(slotId).setStack(stack);
 		}
-		return true;
+		return !ItemStack.areEqual(stack1, stack2);
 	}
 	
 	private boolean takeStack(ItemStack stack, int count, SlotActionType to) {
@@ -170,7 +167,7 @@ public class HugeChestCoreScreenHandler extends ScreenHandler {
 					return false;
 				break;
 			case 1:
-				if (!insertItem(stack, 0, 36, false))
+				if (!insertItem(stack.copy(), 0, 36, false))
 					return false;
 				break;
 			case 2:
@@ -199,8 +196,8 @@ public class HugeChestCoreScreenHandler extends ScreenHandler {
 	
 	static {
 		ServerPlayConnectionEvents.INIT.register((networkHandler, server) -> ServerPlayNetworking.registerReceiver(networkHandler, CHANNEL, (server1, player1, networkHandler1, buf1, sender1) -> {
-			if (player1.currentScreenHandler instanceof HugeChestCoreScreenHandler) {
-				((HugeChestCoreScreenHandler) player1.currentScreenHandler).receive(buf1);
+			if (player1.currentScreenHandler instanceof ChestCoreScreenHandler) {
+				((ChestCoreScreenHandler) player1.currentScreenHandler).receive(buf1);
 			}
 		}));
 	}

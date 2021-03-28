@@ -8,10 +8,12 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
-public class HugeChestWallBlockEntity extends BlockEntity implements BlockEntityClientSerializable {
+import java.util.Objects;
+
+public class ChestWallBlockEntity extends BlockEntity implements BlockEntityClientSerializable {
 	private BlockPos corePos;
 	
-	public HugeChestWallBlockEntity() {
+	public ChestWallBlockEntity() {
 		super(BlockEntityTypesRegistry.HUGE_CHEST_WALL);
 	}
 	
@@ -29,11 +31,11 @@ public class HugeChestWallBlockEntity extends BlockEntity implements BlockEntity
 	}
 	
 	@Nullable
-	public HugeChestCoreBlockEntity getCoreBlockEntity() {
+	public ChestCoreBlockEntity getCoreBlockEntity() {
 		if (corePos != null) {
-			BlockEntity blockEntity0 = world.getBlockEntity(getCorePos());
-			if (blockEntity0 instanceof HugeChestCoreBlockEntity) {
-				return (HugeChestCoreBlockEntity) blockEntity0;
+			BlockEntity blockEntity0 = Objects.requireNonNull(world,"world").getBlockEntity(getCorePos());
+			if (blockEntity0 instanceof ChestCoreBlockEntity) {
+				return (ChestCoreBlockEntity) blockEntity0;
 			}
 		}
 		return null;

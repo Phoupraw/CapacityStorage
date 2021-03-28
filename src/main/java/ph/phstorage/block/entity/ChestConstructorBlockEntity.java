@@ -2,7 +2,7 @@ package ph.phstorage.block.entity;
 
 import alexiil.mc.lib.attributes.Simulation;
 import alexiil.mc.lib.attributes.item.ItemInsertable;
-import com.google.common.collect.*;
+import com.google.common.collect.Maps;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
@@ -18,7 +18,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -26,31 +25,33 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import ph.phstorage.block.BlocksRegistry;
-import ph.phstorage.block.HugeChestWallBlock;
+import ph.phstorage.block.ChestWallBlock;
 import ph.phstorage.item.ItemsRegistry;
-import ph.phstorage.screen.handler.HugeChestConstructorScreenHandler;
+import ph.phstorage.screen.handler.ChestConstructorScreenHandler;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class HugeChestConstructorBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory, BlockEntityClientSerializable, ItemInsertable {
+public class ChestConstructorBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory, BlockEntityClientSerializable, ItemInsertable {
 	private Map<Direction, Integer> extensions = Maps.newEnumMap(Arrays.stream(Direction.values()).collect(Collectors.toMap(Function.identity(), d -> 0)));
 	private CompoundTag coreBlockEntityTag;
 	
-	public HugeChestConstructorBlockEntity() {
+	public ChestConstructorBlockEntity() {
 		super(BlockEntityTypesRegistry.HUGE_CHEST_CONSTRUCTOR);
 	}
 	
 	@Override
 	public Text getDisplayName() {
-		return new TranslatableText(BlocksRegistry.HUGE_CHEST_CONSTRUCTOR.getTranslationKey());
+		return new TranslatableText(BlocksRegistry.CHEST_CONSTRUCTOR.getTranslationKey());
 	}
 	
 	@Nullable
 	@Override
 	public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-		return new HugeChestConstructorScreenHandler(syncId, inv, this);
+		return new ChestConstructorScreenHandler(syncId, inv, this);
 	}
 	
 	@Override
@@ -104,7 +105,12 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 		}
 	}
 	
-	public ActionResult onPlaced(@Nullable PlayerEntity player) {
+	/**
+	 * @param player 放置的玩家
+	 *
+	 * @return 0b1表示放置了；0b10表示箱子是完整的
+	 */
+	public int onPlaced(@Nullable PlayerEntity player) {
 		int e = extensions.get(Direction.EAST), w = -extensions.get(Direction.WEST), u = extensions.get(Direction.UP), d = -extensions.get(Direction.DOWN), s = extensions.get(Direction.SOUTH), n = -extensions.get(Direction.NORTH);
 		boolean entire = true;
 		boolean placed = false;
@@ -115,18 +121,18 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 					if (i == 0 && j == 0 && k == 0)
 						continue;
 					BlockPos pos = getPos().add(i, j, k);
-					BlockState state = world.getBlockState(pos);
+					BlockState state = Objects.requireNonNull(world,"world").getBlockState(pos);
 					if (i > w && i < e && j > d && j < u && k > n && k < s) {
-						if (state.isOf(BlocksRegistry.HUGE_CHEST_LINING)) {
+						if (state.isOf(BlocksRegistry.CHEST_LINING)) {
 							continue;
 						} else {
 							if (placed) {
 								entire = false;
 								break for1;
 							}
-							if (state.isAir() || state.canReplace(new ItemPlacementContext(world, player, Hand.MAIN_HAND, ItemsRegistry.HUGE_CHEST_WALL.getDefaultStack(), new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, true)) {
+							if (state.isAir() || state.canReplace(new ItemPlacementContext(world, player, Hand.MAIN_HAND, ItemsRegistry.CHEST_WALL.getDefaultStack(), new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, true)) {
 							})) {
-								world.setBlockState(pos, BlocksRegistry.HUGE_CHEST_LINING.getDefaultState());
+								world.setBlockState(pos, BlocksRegistry.CHEST_LINING.getDefaultState());
 								placed = true;
 							}
 						}
@@ -134,9 +140,9 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 					}
 					BlockEntity blockEntity0 = world.getBlockEntity(pos);
 					boolean placable = state.isAir() && !placed;
-					if (blockEntity0 instanceof HugeChestWallBlockEntity) {
-						HugeChestWallBlockEntity wallBlockEntity = (HugeChestWallBlockEntity) blockEntity0;
-						HugeChestCoreBlockEntity coreBlockEntity = wallBlockEntity.getCoreBlockEntity();
+					if (blockEntity0 instanceof ChestWallBlockEntity) {
+						ChestWallBlockEntity wallBlockEntity = (ChestWallBlockEntity) blockEntity0;
+						ChestCoreBlockEntity coreBlockEntity = wallBlockEntity.getCoreBlockEntity();
 						if (coreBlockEntity == null) {
 							wallBlockEntity.setCorePos(getPos());
 						} else {
@@ -146,14 +152,14 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 						}
 					}
 					if (placable) {
-						world.setBlockState(pos, BlocksRegistry.HUGE_CHEST_WALL.getDefaultState());
+						world.setBlockState(pos, BlocksRegistry.CHEST_WALL.getDefaultState());
 						BlockEntity blockEntity1 = world.getBlockEntity(pos);
-						if (blockEntity1 instanceof HugeChestWallBlockEntity) {
-							HugeChestWallBlockEntity wallBlockEntity = (HugeChestWallBlockEntity) blockEntity1;
+						if (blockEntity1 instanceof ChestWallBlockEntity) {
+							ChestWallBlockEntity wallBlockEntity = (ChestWallBlockEntity) blockEntity1;
 							wallBlockEntity.setCorePos(getPos());
 						}
 						placed = true;
-					} else if (!state.isOf(BlocksRegistry.HUGE_CHEST_WALL)) {
+					} else if (!state.isOf(BlocksRegistry.CHEST_WALL)) {
 						entire = false;
 					}
 				}
@@ -161,9 +167,9 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 		}
 		if (entire) {
 			placeEntireChest();
-			return ActionResult.SUCCESS;
+			return placed ? 0b11 : 0b10;
 		}
-		return placed ? ActionResult.CONSUME : ActionResult.PASS;
+		return placed ? 0b01 : 0b00;
 	}
 	
 	protected void placeEntireChest() {
@@ -176,13 +182,14 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 						continue;
 					BlockPos pos1 = getPos().add(i, j, k);
 					if ((i == w || i == e) || (j == d || j == u) || (k == n || k == s)) {
-						world.setBlockState(pos1, BlocksRegistry.HUGE_CHEST_WALL.getDefaultState().with(HugeChestWallBlock.PROPERTIES.get(Direction.EAST), i != e).with(HugeChestWallBlock.PROPERTIES.get(Direction.WEST), i != w).with(HugeChestWallBlock.PROPERTIES.get(Direction.UP), j != u).with(HugeChestWallBlock.PROPERTIES.get(Direction.DOWN), j != d).with(HugeChestWallBlock.PROPERTIES.get(Direction.SOUTH), k != s).with(HugeChestWallBlock.PROPERTIES.get(Direction.NORTH), k != n));
+						Objects.requireNonNull(world,"world").setBlockState(pos1, BlocksRegistry.CHEST_WALL.getDefaultState().with(ChestWallBlock.PROPERTIES.get(Direction.EAST), i != e).with(ChestWallBlock.PROPERTIES.get(Direction.WEST), i != w).with(ChestWallBlock.PROPERTIES.get(Direction.UP), j != u).with(ChestWallBlock.PROPERTIES.get(Direction.DOWN), j != d).with(ChestWallBlock.PROPERTIES.get(Direction.SOUTH), k != s).with(ChestWallBlock.PROPERTIES.get(Direction.NORTH), k != n));
 						BlockEntity blockEntity0 = world.getBlockEntity(pos1);
-						if (blockEntity0 instanceof HugeChestWallBlockEntity) {
-						
+						if (blockEntity0 instanceof ChestWallBlockEntity) {
+							ChestWallBlockEntity wallBlockEntity = (ChestWallBlockEntity) blockEntity0;
+							wallBlockEntity.setCorePos(getPos());
 						}
 					} else {
-						world.setBlockState(pos1, BlocksRegistry.HUGE_CHEST_LINING.getDefaultState());
+						world.setBlockState(pos1, BlocksRegistry.CHEST_LINING.getDefaultState());
 					}
 				}
 			}
@@ -190,10 +197,10 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 		//放置核心
 		CompoundTag coreBlockEntityTag = this.coreBlockEntityTag;
 		this.coreBlockEntityTag = null;
-		world.setBlockState(getPos(), BlocksRegistry.HUGE_CHEST_CORE.getDefaultState().with(HugeChestWallBlock.PROPERTIES.get(Direction.EAST), 0 != e).with(HugeChestWallBlock.PROPERTIES.get(Direction.WEST), 0 != w).with(HugeChestWallBlock.PROPERTIES.get(Direction.UP), 0 != u).with(HugeChestWallBlock.PROPERTIES.get(Direction.DOWN), 0 != d).with(HugeChestWallBlock.PROPERTIES.get(Direction.SOUTH), 0 != s).with(HugeChestWallBlock.PROPERTIES.get(Direction.NORTH), 0 != n));
+		Objects.requireNonNull(world,"world").setBlockState(getPos(), BlocksRegistry.CHEST_CORE.getDefaultState().with(ChestWallBlock.PROPERTIES.get(Direction.EAST), 0 != e).with(ChestWallBlock.PROPERTIES.get(Direction.WEST), 0 != w).with(ChestWallBlock.PROPERTIES.get(Direction.UP), 0 != u).with(ChestWallBlock.PROPERTIES.get(Direction.DOWN), 0 != d).with(ChestWallBlock.PROPERTIES.get(Direction.SOUTH), 0 != s).with(ChestWallBlock.PROPERTIES.get(Direction.NORTH), 0 != n));
 		BlockEntity blockEntity0 = world.getBlockEntity(getPos());
-		if (blockEntity0 instanceof HugeChestCoreBlockEntity) {
-			HugeChestCoreBlockEntity core = (HugeChestCoreBlockEntity) blockEntity0;
+		if (blockEntity0 instanceof ChestCoreBlockEntity) {
+			ChestCoreBlockEntity core = (ChestCoreBlockEntity) blockEntity0;
 			final int stackCapacity = 27 * (e - w + 1) * (u - d + 1) * (s - n + 1);
 			if (coreBlockEntityTag != null) {
 				core.fromTag(core.getCachedState(), coreBlockEntityTag);
@@ -216,7 +223,7 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 	
 	public void onDestroyed() {
 		if (coreBlockEntityTag != null) {
-			HugeChestCoreBlockEntity coreBlockEntity = new HugeChestCoreBlockEntity();
+			ChestCoreBlockEntity coreBlockEntity = new ChestCoreBlockEntity();
 			coreBlockEntity.setLocation(world, pos);
 			coreBlockEntity.fromTag(coreBlockEntity.getCachedState(), coreBlockEntityTag);
 			coreBlockEntity.onDestroyed();
@@ -226,9 +233,9 @@ public class HugeChestConstructorBlockEntity extends BlockEntity implements Exte
 	@Override
 	public ItemStack attemptInsertion(ItemStack itemStack, Simulation simulation) {
 		itemStack = itemStack.copy();
-		if (itemStack.getItem() == ItemsRegistry.HUGE_CHEST_WALL) {
+		if (itemStack.getItem() == ItemsRegistry.CHEST_WALL) {
 			if (simulation.isAction()) {
-				while (!itemStack.isEmpty() && onPlaced(null) == ActionResult.CONSUME)
+				while (!itemStack.isEmpty() && (onPlaced(null) & 0b1) == 1)
 					itemStack.decrement(1);
 				return itemStack;
 			}

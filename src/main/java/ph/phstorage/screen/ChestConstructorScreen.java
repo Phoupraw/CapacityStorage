@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import ph.phstorage.ClientInitializer;
 import ph.phstorage.Initializer;
 import ph.phstorage.block.BlocksRegistry;
-import ph.phstorage.screen.handler.HugeChestConstructorScreenHandler;
+import ph.phstorage.screen.handler.ChestConstructorScreenHandler;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -28,14 +28,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
-public class HugeChestConstructorScreen extends HandledScreen<HugeChestConstructorScreenHandler> {
-	public static final Identifier BACKGROUND = ClientInitializer.toGuiTexture(Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CONSTRUCTOR));
+public class ChestConstructorScreen extends HandledScreen<ChestConstructorScreenHandler> {
+	public static final Identifier BACKGROUND = ClientInitializer.toGuiTexture(Registry.BLOCK.getId(BlocksRegistry.CHEST_CONSTRUCTOR));
 	public static final Map<Direction, TranslatableText> DIRECTION_TEXTS = ImmutableMap.copyOf(Arrays.stream(Direction.values()).collect(Collectors.toMap(Function.identity(), direction -> new TranslatableText("gui." + Initializer.NAMESPACE + "." + direction.getName()))));
 	private Map<Direction, TextFieldWidget> textFields;
 	@Nullable
 	private TextFieldWidget uneditableTextField;
 	
-	public HugeChestConstructorScreen(HugeChestConstructorScreenHandler handler, PlayerInventory inventory, Text title) {
+	public ChestConstructorScreen(ChestConstructorScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
 	}
 	

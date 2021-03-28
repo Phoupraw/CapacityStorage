@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "phstorage:block/huge_chest_wall"
+    "all": "phstorage:block/chest_constructor"
   }
 }

@@ -6,8 +6,10 @@ import net.minecraft.util.registry.Registry;
 import ph.phstorage.block.BlocksRegistry;
 import ph.phstorage.block.entity.BlockEntityTypesRegistry;
 import ph.phstorage.item.ItemsRegistry;
-import ph.phstorage.screen.handler.HugeChestConstructorScreenHandler;
-import ph.phstorage.screen.handler.HugeChestCoreScreenHandler;
+import ph.phstorage.screen.handler.ChestConstructorScreenHandler;
+import ph.phstorage.screen.handler.ChestCoreScreenHandler;
+
+import java.util.Objects;
 
 public final class Initializer implements ModInitializer {
 	public static final String NAMESPACE = "phstorage";
@@ -18,8 +20,8 @@ public final class Initializer implements ModInitializer {
 			Class.forName(ItemsRegistry.class.getName());
 			Class.forName(BlocksRegistry.class.getName());
 			Class.forName(BlockEntityTypesRegistry.class.getName());
-			Class.forName(HugeChestConstructorScreenHandler.class.getName());
-			Class.forName(HugeChestCoreScreenHandler.class.getName());
+			Class.forName(ChestConstructorScreenHandler.class.getName());
+			Class.forName(ChestCoreScreenHandler.class.getName());
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -27,8 +29,7 @@ public final class Initializer implements ModInitializer {
 	
 	public static <T> Identifier wrap(Registry<T> registry, T entry) {
 		Identifier identifier = registry.getId(entry);
-		identifier = new Identifier(identifier.getNamespace(), identifier.getPath() +"_"+ registry.getKey().getValue().getPath());
-		System.out.println(identifier);
+		identifier = new Identifier(Objects.requireNonNull(identifier,"identifier").getNamespace(), identifier.getPath() +"_"+ registry.getKey().getValue().getPath());
 		return identifier;
 	}
 }

@@ -9,8 +9,8 @@ import net.minecraft.util.registry.Registry;
 import ph.phstorage.block.BlocksRegistry;
 
 public final class ItemsRegistry {
-	public static final UnplacableBlockItem HUGE_CHEST_WALL = register( Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_WALL),new HugeChestWallItem(BlocksRegistry.HUGE_CHEST_WALL,new Item.Settings().group(ItemGroup.DECORATIONS)));
-	public static final BlockItem HUGE_CHEST_CONSTRUCTOR = register(BlocksRegistry.HUGE_CHEST_CONSTRUCTOR, ItemGroup.DECORATIONS);
+	public static final UnplacableBlockItem CHEST_WALL = register( Registry.BLOCK.getId(BlocksRegistry.CHEST_WALL),new ChestWallItem(BlocksRegistry.CHEST_WALL,new Item.Settings().group(ItemGroup.DECORATIONS)));
+	public static final BlockItem CHEST_CONSTRUCTOR = register(BlocksRegistry.CHEST_CONSTRUCTOR, ItemGroup.DECORATIONS);
 	
 	static BlockItem register(Block block, ItemGroup group) {
 		return register(Registry.BLOCK.getId(block), new BlockItem(block, (new Item.Settings()).group(group)));

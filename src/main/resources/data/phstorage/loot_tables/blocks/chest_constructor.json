@@ -12,7 +12,7 @@
               "source": "block_entity"
             }
           ],
-          "name": "phstorage:huge_chest_constructor"
+          "name": "phstorage:chest_constructor"
         }
       ]
     }

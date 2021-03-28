@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "phstorage:huge_chest_wall"
+          "name": "phstorage:chest_wall"
         }
       ]
     }

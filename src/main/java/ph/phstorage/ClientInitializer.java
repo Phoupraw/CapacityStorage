@@ -10,15 +10,15 @@ import net.minecraft.util.Identifier;
 import ph.phstorage.block.entity.BlockEntityTypesRegistry;
 import ph.phstorage.block.entity.render.HugeChestBlockEntityRenderer;
 import ph.phstorage.block.entity.render.HugeChestModelProvider;
-import ph.phstorage.screen.HugeChestConstructorScreen;
-import ph.phstorage.screen.HugeChestCoreScreen;
+import ph.phstorage.screen.ChestConstructorScreen;
+import ph.phstorage.screen.ChestCoreScreen;
 import ph.phstorage.screen.handler.ScreenHandlerTypesRegistry;
 @Environment(EnvType.CLIENT)
 public final class ClientInitializer implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		ScreenRegistry.register(ScreenHandlerTypesRegistry.HUGE_CHEST_CONSTRUCTOR, HugeChestConstructorScreen::new);
-		ScreenRegistry.register(ScreenHandlerTypesRegistry.HUGE_CHEST_CORE, HugeChestCoreScreen::new);
+		ScreenRegistry.register(ScreenHandlerTypesRegistry.HUGE_CHEST_CONSTRUCTOR, ChestConstructorScreen::new);
+		ScreenRegistry.register(ScreenHandlerTypesRegistry.HUGE_CHEST_CORE, ChestCoreScreen::new);
 		ModelLoadingRegistry.INSTANCE.registerResourceProvider(rm -> new HugeChestModelProvider());
 		BlockEntityRendererRegistry.INSTANCE.register(BlockEntityTypesRegistry.HUGE_CHEST_CORE, HugeChestBlockEntityRenderer::new);
 	}

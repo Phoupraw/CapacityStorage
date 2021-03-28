@@ -16,13 +16,13 @@ import ph.phstorage.item.ItemsRegistry;
 public final class BlocksRegistry {
 	public static final AbstractBlock.Settings SETTINGS = AbstractBlock.Settings.of(Material.WOOD).strength(2.5F).sounds(BlockSoundGroup.WOOD).allowsSpawning((state, world, pos, type) -> false);
 	
-	public static final HugeChestWallBlock HUGE_CHEST_WALL = register("huge_chest_wall", new HugeChestWallBlock(SETTINGS));
-	public static final HugeChestCoreBlock HUGE_CHEST_CORE = register("huge_chest_core", new HugeChestCoreBlock(SETTINGS));
-	public static final HugeChestConstructorBlock HUGE_CHEST_CONSTRUCTOR = register("huge_chest_constructor", new HugeChestConstructorBlock(SETTINGS));
-	public static final Block HUGE_CHEST_LINING = register("huge_chest_lining", new Block(SETTINGS){
+	public static final ChestWallBlock CHEST_WALL = register("chest_wall", new ChestWallBlock(SETTINGS));
+	public static final ChestCoreBlock CHEST_CORE = register("chest_core", new ChestCoreBlock(SETTINGS));
+	public static final ChestConstructorBlock CHEST_CONSTRUCTOR = register("chest_constructor", new ChestConstructorBlock(SETTINGS));
+	public static final Block CHEST_LINING = register("chest_lining", new Block(SETTINGS){
 		@Override
 		public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
-			return ItemsRegistry.HUGE_CHEST_WALL.getDefaultStack();
+			return ItemsRegistry.CHEST_WALL.getDefaultStack();
 		}
 	});
 	

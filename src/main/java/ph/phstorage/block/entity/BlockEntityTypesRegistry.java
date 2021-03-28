@@ -13,9 +13,9 @@ import ph.phstorage.block.BlocksRegistry;
 import java.util.function.Supplier;
 
 public final class BlockEntityTypesRegistry {
-	public static final BlockEntityType<HugeChestCoreBlockEntity> HUGE_CHEST_CORE = register(HugeChestCoreBlockEntity::new, BlocksRegistry.HUGE_CHEST_CORE);
-	public static final BlockEntityType<HugeChestWallBlockEntity> HUGE_CHEST_WALL = register(HugeChestWallBlockEntity::new, BlocksRegistry.HUGE_CHEST_WALL);
-	public static final BlockEntityType<HugeChestConstructorBlockEntity> HUGE_CHEST_CONSTRUCTOR = register(HugeChestConstructorBlockEntity::new, BlocksRegistry.HUGE_CHEST_CONSTRUCTOR);
+	public static final BlockEntityType<ChestCoreBlockEntity> HUGE_CHEST_CORE = register(ChestCoreBlockEntity::new, BlocksRegistry.CHEST_CORE);
+	public static final BlockEntityType<ChestWallBlockEntity> HUGE_CHEST_WALL = register(ChestWallBlockEntity::new, BlocksRegistry.CHEST_WALL);
+	public static final BlockEntityType<ChestConstructorBlockEntity> HUGE_CHEST_CONSTRUCTOR = register(ChestConstructorBlockEntity::new, BlocksRegistry.CHEST_CONSTRUCTOR);
 	
 	@Deprecated
 	static <T extends BlockEntity> BlockEntityType<T> register(String path, BlockEntityType.Builder<T> builder) {

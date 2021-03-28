@@ -17,19 +17,19 @@ import net.minecraft.util.registry.Registry;
 import ph.phstorage.api.CodeUtil;
 import ph.phstorage.Initializer;
 import ph.phstorage.block.BlocksRegistry;
-import ph.phstorage.block.entity.HugeChestConstructorBlockEntity;
+import ph.phstorage.block.entity.ChestConstructorBlockEntity;
 
-public class HugeChestConstructorScreenHandler extends ScreenHandler {
-	public static final Identifier CHANNEL =Initializer.wrap(Registry.BLOCK,BlocksRegistry.HUGE_CHEST_CONSTRUCTOR);
-	private final HugeChestConstructorBlockEntity thisBlockEntity;
+public class ChestConstructorScreenHandler extends ScreenHandler {
+	public static final Identifier CHANNEL =Initializer.wrap(Registry.BLOCK,BlocksRegistry.CHEST_CONSTRUCTOR);
+	private final ChestConstructorBlockEntity thisBlockEntity;
 	
-	public HugeChestConstructorScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-		this(syncId, playerInventory, new HugeChestConstructorBlockEntity());
+	public ChestConstructorScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+		this(syncId, playerInventory, new ChestConstructorBlockEntity());
 		for (Direction direction : Direction.values())
 			thisBlockEntity.setExtension(direction, buf.readInt());
 	}
 	
-	public HugeChestConstructorScreenHandler(int syncId, PlayerInventory playerInventory, HugeChestConstructorBlockEntity thisBlockEntity) {
+	public ChestConstructorScreenHandler(int syncId, PlayerInventory playerInventory, ChestConstructorBlockEntity thisBlockEntity) {
 		super(ScreenHandlerTypesRegistry.HUGE_CHEST_CONSTRUCTOR, syncId);
 		this.thisBlockEntity = thisBlockEntity;
 		CodeUtil.addPlayerSlots(this::addSlot, playerInventory);
@@ -59,8 +59,8 @@ public class HugeChestConstructorScreenHandler extends ScreenHandler {
 	
 	static {
 		ServerPlayConnectionEvents.INIT.register((networkHandler, server) -> ServerPlayNetworking.registerReceiver(networkHandler, CHANNEL, (server1, player1, networkHandler1, buf1, sender1) -> {
-			if (player1.currentScreenHandler instanceof HugeChestConstructorScreenHandler)
-				((HugeChestConstructorScreenHandler) player1.currentScreenHandler).thisBlockEntity.setExtension(Direction.byId(buf1.readInt()), buf1.readInt());
+			if (player1.currentScreenHandler instanceof ChestConstructorScreenHandler)
+				((ChestConstructorScreenHandler) player1.currentScreenHandler).thisBlockEntity.setExtension(Direction.byId(buf1.readInt()), buf1.readInt());
 		}));
 	}
 }

@@ -1,6 +1,6 @@
 {
   "textures": {
-    "0": "phstorage:block/huge_chest_core",
+    "0": "phstorage:block/chest_core",
     "particle": "#0"
   },
   "elements": [

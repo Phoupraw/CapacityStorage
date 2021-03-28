@@ -10,8 +10,8 @@ import net.minecraft.util.registry.Registry;
 import ph.phstorage.block.entity.BlockEntityTypesRegistry;
 
 public final class ScreenHandlerTypesRegistry {
-	public static final ScreenHandlerType<HugeChestConstructorScreenHandler> HUGE_CHEST_CONSTRUCTOR = ScreenHandlerRegistry.registerExtended(Registry.BLOCK_ENTITY_TYPE.getId(BlockEntityTypesRegistry.HUGE_CHEST_CONSTRUCTOR), HugeChestConstructorScreenHandler::new);
-	public static final ScreenHandlerType<HugeChestCoreScreenHandler> HUGE_CHEST_CORE = ScreenHandlerRegistry.registerExtended(Registry.BLOCK_ENTITY_TYPE.getId(BlockEntityTypesRegistry.HUGE_CHEST_CORE), HugeChestCoreScreenHandler::new);
+	public static final ScreenHandlerType<ChestConstructorScreenHandler> HUGE_CHEST_CONSTRUCTOR = ScreenHandlerRegistry.registerExtended(Registry.BLOCK_ENTITY_TYPE.getId(BlockEntityTypesRegistry.HUGE_CHEST_CONSTRUCTOR), ChestConstructorScreenHandler::new);
+	public static final ScreenHandlerType<ChestCoreScreenHandler> HUGE_CHEST_CORE = ScreenHandlerRegistry.registerExtended(Registry.BLOCK_ENTITY_TYPE.getId(BlockEntityTypesRegistry.HUGE_CHEST_CORE), ChestCoreScreenHandler::new);
 	private ScreenHandlerTypesRegistry() {
 	}
 	

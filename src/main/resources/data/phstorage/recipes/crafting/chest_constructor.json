@@ -10,10 +10,10 @@
       "tag": "wooden_fences"
     },
     "B": {
-      "item": "phstorage:huge_chest_wall"
+      "item": "phstorage:chest_wall"
     }
   },
   "result": {
-    "item": "phstorage:huge_chest_constructor"
+    "item": "phstorage:chest_constructor"
   }
 }

@@ -329,7 +329,6 @@ public final class CodeUtil {
 	 * @param pos   位置
 	 */
 	public static boolean canHarvest(ItemStack stack, BlockState state, World world, BlockPos pos) {
-//		System.out.println(state.getBlock() + ": " + state.getHardness(world, pos));
 		return canHarvest(stack, state) && state.getHardness(world, pos) >= 0;
 	}
 

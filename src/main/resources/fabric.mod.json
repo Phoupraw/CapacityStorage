@@ -4,13 +4,14 @@
   "version": "${version}",
 
   "name": "容积储存",
-  "description": "一种与物品种类数量无关的储物箱。在这里，64个相同物品和64个不同但是最大堆叠数与之相同的物品所占的空间相同。",
+  "description": "\\u4e00种与物品种类数量无关的储物箱。在这里\\uff0c64个相同物品和64个不同但是最大堆叠数与之相同的物品所占的空间相同\\u3002",
   "authors": [
-    "Ph-苯"
+    "Ph-\\u82ef"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/Phoupraw/CapacityStorage",
+    "sources": "https://github.com/Phoupraw/CapacityStorage",
+    "issues": "https://github.com/Phoupraw/CapacityStorage/issues"
   },
 
   "license": "CC0-1.0",
@@ -37,5 +38,14 @@
   },
   "suggests": {
     "another-mod": "*"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "MCBBS": "https://www.mcbbs.net/forum.php",
+        "MCMOD": "https://www.mcmod.cn/"
+      }
+    }
   }
 }

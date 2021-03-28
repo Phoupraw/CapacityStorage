@@ -31,8 +31,8 @@ import java.util.function.Supplier;
 @Environment(EnvType.CLIENT)
 public class HugeChestModel implements UnbakedModel, BakedModel, FabricBakedModel {
 	private static final SpriteIdentifier[] SPRITE_IDS = new SpriteIdentifier[]{
-			new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("phstorage:block/huge_chest_wall")),
-			new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("phstorage:block/huge_chest_core"))
+			new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("phstorage:block/chest_wall")),
+			new SpriteIdentifier(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE, new Identifier("phstorage:block/chest_core"))
 	};
 	private Sprite[] SPRITES = new Sprite[2];
 	private Mesh mesh;

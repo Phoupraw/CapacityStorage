@@ -11,7 +11,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -20,15 +19,15 @@ import net.minecraft.util.registry.Registry;
 import ph.phstorage.ClientInitializer;
 import ph.phstorage.Initializer;
 import ph.phstorage.block.BlocksRegistry;
-import ph.phstorage.block.entity.HugeChestCoreBlockEntity;
-import ph.phstorage.screen.handler.HugeChestCoreScreenHandler;
+import ph.phstorage.block.entity.ChestCoreBlockEntity;
+import ph.phstorage.screen.handler.ChestCoreScreenHandler;
 
 import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
-public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandler> {
-	public static final Identifier BACKGROUND = ClientInitializer.toGuiTexture(Registry.BLOCK.getId(BlocksRegistry.HUGE_CHEST_CORE));
+public class ChestCoreScreen extends HandledScreen<ChestCoreScreenHandler> {
+	public static final Identifier BACKGROUND = ClientInitializer.toGuiTexture(Registry.BLOCK.getId(BlocksRegistry.CHEST_CORE));
 	private int itemsX;
 	private int itemsY;
 	private int itemsWidth;
@@ -40,7 +39,7 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 	private int rowCapacity;
 	private List<List<Pair<Integer, ItemStack>>> itemXes;
 	
-	public HugeChestCoreScreen(HugeChestCoreScreenHandler handler, PlayerInventory inventory, Text title) {
+	public ChestCoreScreen(ChestCoreScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
 	}
 	
@@ -111,7 +110,7 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 		int irow = 0;
 		totalRows = 1;
 		rowCapacity = itemsHeight / 16;
-		for (ItemStack stack : handler.thisBlockEntity.getStoredStacks(HugeChestCoreBlockEntity.DEFAULT_COMPARATOR)) {
+		for (ItemStack stack : handler.thisBlockEntity.getStoredStacks(ChestCoreBlockEntity.DEFAULT_COMPARATOR)) {
 			String c = String.valueOf(stack.getCount());
 			int w = Math.max(16, textRenderer.getWidth(c) + 2);
 			if (x1 + w > itemsX + itemsWidth) {
@@ -155,7 +154,6 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 	 */
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int key) {
-//		System.out.println("key="+key);
 		if (Screen.hasShiftDown()) {
 			if (focusedSlot != null) {
 				ItemStack stack = focusedSlot.getStack();
@@ -163,7 +161,7 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 					if (key == 2) {
 						handler.syncCloneStack(stack, 2);
 					} else {
-						handler.syncPutStack(focusedSlot.id, key == 0 ? stack.getCount() : (stack.getCount() + 1) / 2);
+						handler.syncPutStack(focusedSlot.id, key == 0 ? stack.getCount() : stack.getCount()-1);
 					}
 					return true;
 				}
@@ -186,7 +184,7 @@ public class HugeChestCoreScreen extends HandledScreen<HugeChestCoreScreenHandle
 				if (key == 2) {
 					handler.syncCloneStack(stack, 2);
 				} else {
-					handler.syncPutStack(HugeChestCoreScreenHandler.CURSOR_SLOT_ID, key == 0 ? stack.getCount() : 1);
+					handler.syncPutStack(ChestCoreScreenHandler.CURSOR_SLOT_ID, key == 0 ? stack.getCount() : 1);
 				}
 				return true;
 			} else {
