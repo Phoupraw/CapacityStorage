@@ -172,7 +172,7 @@ public class ChestConstructorBlockEntity extends BlockEntity implements Extended
 		return placed ? 0b01 : 0b00;
 	}
 	
-	protected void placeEntireChest() {
+	private void placeEntireChest() {
 		int e = extensions.get(Direction.EAST), w = -extensions.get(Direction.WEST), u = extensions.get(Direction.UP), d = -extensions.get(Direction.DOWN), s = extensions.get(Direction.SOUTH), n = -extensions.get(Direction.NORTH);
 		//放置外壁和内衬
 		for (int i = w; i <= e; i++) {
@@ -213,11 +213,11 @@ public class ChestConstructorBlockEntity extends BlockEntity implements Extended
 		}
 	}
 	
-	protected void setExtensions(Map<Direction, Integer> extensions) {
+	 void setExtensions(Map<Direction, Integer> extensions) {
 		this.extensions = extensions;
 	}
 	
-	protected void setCoreBlockEntityTag(CompoundTag coreBlockEntityTag) {
+	 void setCoreBlockEntityTag(CompoundTag coreBlockEntityTag) {
 		this.coreBlockEntityTag = coreBlockEntityTag;
 	}
 	

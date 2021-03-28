@@ -13,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -192,7 +193,7 @@ public class ChestCoreBlockEntity extends BlockEntity implements GroupedItemInv,
 		return GroupedItemInv.super.attemptAnyExtraction(maxAmount, simulation);
 	}
 	
-	public void clear() {
+	private void clear() {
 		tabledItems = HashBasedTable.create();
 		stackSpace = getStackCapacity();
 	}
@@ -208,26 +209,8 @@ public class ChestCoreBlockEntity extends BlockEntity implements GroupedItemInv,
 		return new ChestCoreScreenHandler(syncId, inv, this);
 	}
 	
-	protected void setExtensions(Map<Direction, Integer> extensions) {
+	void setExtensions(Map<Direction, Integer> extensions) {
 		this.extensions = extensions;
-	}
-	
-	@Deprecated
-	public void breakEntireChest() {
-		int e = extensions.get(Direction.EAST), w = -extensions.get(Direction.WEST), u = extensions.get(Direction.UP), d = -extensions.get(Direction.DOWN), s = extensions.get(Direction.SOUTH), n = -extensions.get(Direction.NORTH);
-		for (int i = w; i <= e; i++) {
-			for (int j = d; j <= u; j++) {
-				for (int k = n; k <= s; k++) {
-					if (i > w && i < e && j > d && j < u && k > n && k < s || i == 0 && j == 0 && k == 0)
-						continue;
-					BlockPos pos = getPos().add(i, j, k);
-					BlockState state = Objects.requireNonNull(world, "world").getBlockState(pos);
-					if (state.isOf(BlocksRegistry.CHEST_WALL)) {
-						world.breakBlock(pos, true);
-					}
-				}
-			}
-		}
 	}
 	
 	void setStackCapacity(double stackCapacity) {
@@ -246,8 +229,13 @@ public class ChestCoreBlockEntity extends BlockEntity implements GroupedItemInv,
 		return stackSpace;
 	}
 	
-	public List<ItemStack> clearToList() {
-		List<ItemStack> list = Lists.newArrayList(tabledItems.values());
+	private List<ItemStack> clearToList() {
+		List<ItemStack> list = Lists.newArrayList();
+		for (ItemStack stack : tabledItems.values()) {
+			while (!stack.isEmpty()) {
+				list.add(stack.split(stack.getMaxCount()));
+			}
+		}
 		clear();
 		return list;
 	}
@@ -293,6 +281,7 @@ public class ChestCoreBlockEntity extends BlockEntity implements GroupedItemInv,
 		return list;
 	}
 	
+	@Deprecated
 	public static ItemStack of(Map.Entry<Pair<Item, CompoundTag>, Integer> entry) {
 		ItemStack stack = new ItemStack(entry.getKey().getFirst(), entry.getValue());
 		stack.setTag(entry.getKey().getSecond());
@@ -311,6 +300,16 @@ public class ChestCoreBlockEntity extends BlockEntity implements GroupedItemInv,
 	
 	@Override
 	public void writeScreenOpeningData(ServerPlayerEntity serverPlayerEntity, PacketByteBuf packetByteBuf) {
+//		if (tabledItems.isEmpty()) {
+//			for (int i = 0; i < 1000; i++) {
+//				Item item = Item.byRawId(i);
+//				if (item == Items.AIR) {
+//					System.out.println("一共有" + i + "个不同ID的物品");
+//				} else {
+//					insert(item.getDefaultStack());
+//				}
+//			}
+//		}
 		packetByteBuf.writeBlockPos(getPos());
 	}
 	

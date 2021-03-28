@@ -34,7 +34,7 @@ public class ChestCoreScreen extends HandledScreen<ChestCoreScreenHandler> {
 	private int itemsHeight;
 	private int borderBreadth;
 	private int fontHeight;
-	private int viewingRow;
+	private static int viewingRow;
 	private int totalRows;
 	private int rowCapacity;
 	private List<List<Pair<Integer, ItemStack>>> itemXes;
@@ -52,11 +52,12 @@ public class ChestCoreScreen extends HandledScreen<ChestCoreScreenHandler> {
 		itemsWidth = (width - itemsX * 2) / 16 * 16;
 		itemsHeight = (y + handler.getSlot(0).y - 16 - itemsY) / 16 * 16;
 		rowCapacity = itemsHeight / 16;
-		viewingRow = 0;
+		//		viewingRow = 0;
 		borderBreadth = 8;
 		titleX = itemsX - x;
 		titleY = itemsY - textRenderer.fontHeight - 1 - y;
 		playerInventoryTitleY = handler.getSlot(0).y - textRenderer.fontHeight - 1;
+		
 	}
 	
 	@Override//必须重写，不然没有暗色背景和工具提示
@@ -138,6 +139,9 @@ public class ChestCoreScreen extends HandledScreen<ChestCoreScreenHandler> {
 			}
 			x1 += w;
 		}
+		if (totalRows <= rowCapacity){
+			viewingRow -= rowCapacity-totalRows;
+		}
 	}
 	
 	@Override
@@ -161,7 +165,7 @@ public class ChestCoreScreen extends HandledScreen<ChestCoreScreenHandler> {
 					if (key == 2) {
 						handler.syncCloneStack(stack, 2);
 					} else {
-						handler.syncPutStack(focusedSlot.id, key == 0 ? stack.getCount() : stack.getCount()-1);
+						handler.syncPutStack(focusedSlot.id, key == 0 ? stack.getCount() : stack.getCount() - 1);
 					}
 					return true;
 				}

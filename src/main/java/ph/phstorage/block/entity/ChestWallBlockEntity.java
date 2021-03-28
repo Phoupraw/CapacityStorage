@@ -45,7 +45,7 @@ public class ChestWallBlockEntity extends BlockEntity implements BlockEntityClie
 		return corePos;
 	}
 	
-	protected void setCorePos(BlockPos corePos) {
+	 void setCorePos(BlockPos corePos) {
 		this.corePos = corePos;
 		if (world!=null&& !world.isClient)
 			sync();
